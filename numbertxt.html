@@ -53,6 +53,17 @@
         top: 20px;
         right: 20px;
       }
+
+      @media print {
+        #downloadButton,
+        #printButton,
+        #generate-btn {
+          display: none;
+        }
+        .questions-container {
+          height: 100;
+        }
+      }
     </style>
   </head>
   <body>
@@ -71,6 +82,7 @@
       />
     </button>
     <button
+      id="generate-btn"
       cy="cy-btnGen"
       class="centered-button"
       onclick="generateQuestions()"
