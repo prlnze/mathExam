@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Guess the Number</title>
+
+    <style>
+      h1,
+      button {
+        text-align: center;
+        color: #aa66cc;
+        margin: 10px;
+      }
+
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background-color: #f1f3f3;
+      }
+
+      .question {
+        margin-bottom: 10px;
+      }
+      .answer {
+        margin-left: 50px;
+        display: flex;
+        align-items: flex-end;
+      }
+      .centered-button {
+        display: block;
+        margin: 0 auto;
+        padding: 15px 30px;
+        font-size: 20px;
+        background-color: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+        font-family: "Comic Sans MS", cursive, sans-serif;
+      }
+      .questions-container {
+        text-align: left;
+        margin: 20px auto;
+        border: 2px solid #838383;
+        padding: 30px;
+        max-width: 75%; /* Adjust this width as needed */
+      }
+      .centered-button:hover {
+        background-color: #ff9f9f;
+      }
+
+      .top-right {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 cy="header">Guess the Number</h1>
+    <button
+      id="printButton"
+      class="top-right"
+      style="width: 8%; height: 8%"
+      cy="cy-btn-print"
+    >
+      <img
+        src="printer-icon.png"
+        alt="Print"
+        style="max-width: 100%; max-height: 100%"
+        ;
+      />
+    </button>
+    <button
+      cy="cy-btnGen"
+      class="centered-button"
+      onclick="generateQuestions()"
+    >
+      Make it happen
+    </button>
+
+    <div id="questionsContainer" class="questions-container"></div>
+
+    <button
+      cy="cy-btnDownload"
+      class="centered-button"
+      id="downloadButton"
+      onclick="downloadQuestions()"
+    >
+      Download Questions & Answers
+    </button>
+    <script>
+      questionNumberContainer = [];
+      solutionNumberContainer = [];
+
+      printButton = document.getElementById("printButton");
+      printButton.addEventListener("click", function () {
+        window.print();
+      });
+
+      function generateQuestions() {
+        var questionsContainer = document.getElementById("questionsContainer");
+        questionsContainer.innerHTML = ""; // Clear previous questions
+        questionNumberContainer = [];
+        solutionNumberContainer = [];
+        for (var i = 1; i <= 10; i++) {
+          var randomNumber =
+            Math.floor(Math.random() * (10000000 - 300 + 1)) + 300;
+          // console.log(randomNumber + " === " + numberToText(randomNumber));
+
+          var textRepresentation = numberToText(randomNumber); // Using modulo to get a corresponding text number
+          questionNumberContainer.push(textRepresentation);
+          solutionNumberContainer.push(randomNumber);
+          var questionDiv = document.createElement("div");
+          questionDiv.className = "question";
+          questionDiv.setAttribute("cy", "question-" + i);
+          questionDiv.textContent =
+            "Question " + i + ": " + textRepresentation + " ";
+
+          var answerInput = document.createElement("input");
+          answerInput.className = "answer";
+          answerInput.type = "number";
+          answerInput.id = "answer" + i;
+          answerInput.setAttribute("cy", "answer-" + i);
+          answerInput.placeholder = "Enter your answer";
+
+          questionDiv.appendChild(answerInput);
+          questionsContainer.appendChild(questionDiv);
+        }
+      }
+      function downloadQuestions() {
+        var questionsAndAnswers = [];
+        correctCounter = 0;
+        const now = new Date();
+        const dateOnly = now.toLocaleDateString(); // Get current date
+        for (var i = 1; i <= 10; i++) {
+          var questionText = document.querySelector(
+            ".question:nth-child(" + i + ")"
+          ).textContent;
+          var answer = document.getElementById("answer" + i).value;
+          var solutionAnswer = solutionNumberContainer[i - 1];
+          const isCorrect = answer == solutionAnswer;
+          if (isCorrect) {
+            correctCounter++;
+          }
+          questionsAndAnswers.push({
+            question: questionText,
+            solution: solutionAnswer,
+            answer: answer,
+            isCorrect: isCorrect,
+          });
+        }
+        questionsAndAnswers.push({
+          CorrectCount: correctCounter,
+          Date: dateOnly,
+        });
+        var jsonData = JSON.stringify(questionsAndAnswers, null, 2);
+        var blob = new Blob([jsonData], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "questions_and_answers.json";
+        a.click();
+      }
+      function numberToText(number) {
+        const singleDigits = [
+          "Zero",
+          "One",
+          "Two",
+          "Three",
+          "Four",
+          "Five",
+          "Six",
+          "Seven",
+          "Eight",
+          "Nine",
+        ];
+        const teens = [
+          "Ten",
+          "Eleven",
+          "Twelve",
+          "Thirteen",
+          "Fourteen",
+          "Fifteen",
+          "Sixteen",
+          "Seventeen",
+          "Eighteen",
+          "Nineteen",
+        ];
+        const tens = [
+          "",
+          "Ten",
+          "Twenty",
+          "Thirty",
+          "Forty",
+          "Fifty",
+          "Sixty",
+          "Seventy",
+          "Eighty",
+          "Ninety",
+        ];
+        const bigNumbers = ["", "Thousand", "Million", "Billion", "Trillion"]; // You can extend this as needed
+
+        if (number === 0) {
+          return singleDigits[0];
+        }
+
+        function convertChunk(chunk) {
+          if (chunk === 0) {
+            return "";
+          } else if (chunk < 10) {
+            return singleDigits[chunk];
+          } else if (chunk < 20) {
+            return teens[chunk - 10];
+          } else if (chunk < 100) {
+            const tensDigit = Math.floor(chunk / 10);
+            const onesDigit = chunk % 10;
+            return (
+              tens[tensDigit] +
+              (onesDigit !== 0 ? "-" + singleDigits[onesDigit] : "")
+            );
+          } else {
+            const hundredsDigit = Math.floor(chunk / 100);
+            const remainingChunk = chunk % 100;
+            return (
+              singleDigits[hundredsDigit] +
+              " Hundred" +
+              (remainingChunk !== 0 ? " " + convertChunk(remainingChunk) : "")
+            );
+          }
+        }
+
+        const numStr = String(number);
+        const chunks = [];
+        for (let i = numStr.length; i > 0; i -= 3) {
+          chunks.unshift(numStr.slice(Math.max(i - 3, 0), i));
+        }
+
+        let text = "";
+        for (let i = 0; i < chunks.length; i++) {
+          const chunk = parseInt(chunks[i]);
+          if (chunk !== 0) {
+            text +=
+              convertChunk(chunk) +
+              " " +
+              bigNumbers[chunks.length - i - 1] +
+              " ";
+          }
+        }
+
+        return text.trim();
+      }
+      generateQuestions();
+    </script>
+  </body>
+</html>

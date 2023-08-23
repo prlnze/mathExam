@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Make Millions</title>
+    <style>
+      h1,
+      h2 {
+        text-align: center;
+        color: #aa66cc;
+      }
+      body {
+        font-family: "Comic Sans MS", cursive, sans-serif;
+        background-color: #f1f3f3;
+      }
+
+      .questions-container {
+        text-align: center;
+        margin: 20px auto;
+        border: 2px solid #838383;
+        padding: 10px;
+        max-width: 600px; /* Adjust this width as needed */
+      }
+
+      .centered-button {
+        display: block;
+        margin: 0 auto;
+        padding: 15px 30px;
+        font-size: 20px;
+        background-color: #ff6b6b;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out;
+        font-family: "Comic Sans MS", cursive, sans-serif;
+      }
+
+      .centered-button:hover {
+        background-color: #ff9f9f;
+      }
+
+      .top-right {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+      }
+
+      .question p {
+        text-align: left;
+        margin: 10px 0;
+      }
+
+      @media print {
+        #download-btn,
+        #printButton,
+        #generate-btn {
+          display: none;
+        }
+        .questions-container {
+          height: 100;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Make Millions</h1>
+    <h2 id="encouragement"></h2>
+
+    <button class="centered-button cy-btn-generate" id="generate-btn">
+      Make it harder !
+    </button>
+    <button
+      id="printButton"
+      class="top-right cy-btn-print"
+      style="width: 8%; height: 8%"
+    >
+      <img
+        src="printer-icon.png"
+        alt="Print"
+        style="max-width: 100%; max-height: 100%"
+        ;
+      />
+    </button>
+    <div class="questions-container" id="questions-container">
+      <!-- Questions will be displayed here -->
+    </div>
+    <button class="centered-button cy-btn-download" id="download-btn">
+      Download Questions and Answers
+    </button>
+    <script>
+      const generateBtn = document.getElementById("generate-btn");
+      const downloadBtn = document.getElementById("download-btn");
+      const questionsContainer = document.getElementById("questions-container");
+      questionNumberContainer = [];
+      solutionNumberContainer = [];
+      const randomColors = [
+        "#000000",
+        // "#FF5733",
+        // "#466fd9",
+        // "#5733FF",
+        // "#FF33AE",
+        // "#33C4FF",
+        // "#D833FF",
+        // "#FF3366",
+      ];
+
+      const username = ["Ty", "Tann"];
+      // Array of encouraging sentences
+      const encouragingSentences = [
+        "You're doing great!",
+        "Keep up the good work!",
+        "You're getting better with each question!",
+        "Math is fun when you're solving these!",
+        "You're a math wizard in the making!",
+        "You are loved and valued!",
+        "You radiate love and kindness!",
+        "Your presence brings joy to others!",
+        "You have a heart of gold!",
+        "You deserve all the love in the world!",
+      ];
+
+      // Function to display a random encouraging sentence
+      function displayEncouragement() {
+        const encouragementElement = document.getElementById("encouragement");
+        encouragementElement.textContent =
+          encouragingSentences[getRandomIndexOf(encouragingSentences)] +
+          " " +
+          username[getRandomIndexOf(username)];
+      }
+      function getRandomIndexOf(array) {
+        return Math.floor(Math.random() * array.length);
+      }
+      generateBtn.addEventListener("click", generateQuestions);
+      downloadBtn.addEventListener("click", downloadQuestions);
+      printButton = document.getElementById("printButton");
+      function generateRandomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function generateRandomQuestion() {
+        // const num1 = generateRandomNumber(1, 1000);
+        // const num2 = generateRandomNumber(1, 1000);
+        // const num3 = generateRandomNumber(1, 1000);
+        // const num4 = generateRandomNumber(1, 1000);
+        // const operator = ["+", "-", "*", "/"][generateRandomNumber(0, 0)];
+
+        // return `${num1} ${operator} ${num2} ${operator} ${num3} ${operator} ${num4}`;
+        const numberOfTerms = 7;
+        const terms = [];
+
+        for (let i = 0; i < numberOfTerms; i++) {
+          const digits = 7 - i; // Decreasing digits for each term
+          let term = 0;
+
+          if (Math.random() < 0.88) {
+            const firstDigit = Math.floor(Math.random() * 9) + 1; // Generate non-zero first digit
+            const zeros = "0".repeat(digits - 1);
+            term = parseInt(`${firstDigit}${zeros}`);
+          }
+          terms.push(term.toLocaleString()); // Add commas for readability
+        }
+
+        const question = terms.join(" + ");
+
+        return question;
+      }
+
+      function solveQuestion(question) {
+        // return eval(question).toFixed(2);
+        const sanitizedQuestion = question.replace(/,/g, ""); // Remove commas
+        const result = eval(sanitizedQuestion);
+        return result;
+      }
+
+      function generateQuestions() {
+        displayEncouragement();
+        questionsContainer.innerHTML = "";
+        questionNumberContainer = [];
+        solutionNumberContainer = [];
+        for (let i = 1; i <= 10; i++) {
+          const question = generateRandomQuestion();
+          questionNumberContainer.push(question);
+          solutionNumberContainer.push(solveQuestion(question));
+          const questionDiv = document.createElement("div");
+          questionDiv.classList.add("question");
+          questionDiv.innerHTML = `
+                      <p style="color: ${getRandomColor()}" id="question-${i}" class="cy-question-${i}"><strong>Question ${i}:</strong> ${question}</p>
+                      <p><strong>Your Answer:</strong> <input type="text" class="user-answer cy-answer-${i}" id="answer-${i}"></p>
+                  `;
+
+          questionsContainer.appendChild(questionDiv);
+        }
+      }
+
+      function downloadQuestions() {
+        const questionsData = [];
+        correctCounter = 0;
+        const now = new Date();
+        const dateOnly = now.toLocaleDateString(); // Get current date
+        for (let i = 1; i <= 10; i++) {
+          const question = questionNumberContainer[i - 1];
+          //   console.log("download " + questionNumberContainer);
+          const solution = solutionNumberContainer[i - 1];
+          const userAnswer = document.getElementById(`answer-${i}`).value;
+          const isCorrect = userAnswer == solution;
+          if (isCorrect) {
+            correctCounter++;
+          }
+          questionsData.push({
+            question: question,
+            solution: solution,
+            userAnswer: userAnswer,
+            isCorrect: isCorrect,
+          });
+        }
+        questionsData.push({
+          CorrectCount: correctCounter,
+          Date: dateOnly,
+        });
+        const jsonData = JSON.stringify(questionsData, null, 2);
+        const blob = new Blob([jsonData], { type: "application/json" });
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = "math_questions.json";
+        downloadLink.click();
+      }
+
+      function getRandomColor() {
+        return randomColors[getRandomIndexOf(randomColors)];
+      }
+
+      printButton.addEventListener("click", function () {
+        window.print();
+      });
+      displayEncouragement();
+      generateQuestions();
+    </script>
+  </body>
+</html>
